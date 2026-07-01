@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DMAIC Challenge Lab — Lean Six Sigma Training</title>
+<meta name="description" content="A challenge-based DMAIC training tool. Five phases, one running case, scenario questionnaires with instant feedback, and a certificate of completion.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --canvas:#F2F4F1;--paper:#FBFCFA;--ink:#16211C;--ink-soft:#46544D;--ink-faint:#8A958F;
+  --line:#D7DDD6;--line-strong:#C2CABF;--grid:#E4E8E2;
+  --good:#2F6F57;--good-bg:#E7F1EC;--bad:#A63D2E;--bad-bg:#F6E7E3;
+  --shadow:0 1px 2px rgba(22,33,28,.05),0 8px 24px rgba(22,33,28,.06);
+  --d:#2F6F57;--m:#2A6F97;--a:#9E4A2F;--i:#B8862B;--c:#5C4D8A;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--canvas);color:var(--ink);font-family:'Inter',system-ui,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:28px 28px;background-position:-1px -1px;}
+a{color:inherit}
+.wrap{max-width:920px;margin:0 auto;padding:0 20px}
+
+/* ---------- Top nav ---------- */
+.topnav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.topnav .bar{max-width:920px;margin:0 auto;padding:11px 20px;display:flex;align-items:center;gap:20px}
+.brand{display:flex;align-items:center;gap:9px;text-decoration:none;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;letter-spacing:-.01em;color:var(--ink)}
+.brand svg{flex:none}
+.navlinks{display:flex;gap:4px;margin-left:auto}
+.navlinks a{text-decoration:none;font-size:13.5px;font-weight:500;color:var(--ink-soft);padding:7px 12px;border-radius:8px;transition:background .12s,color .12s}
+.navlinks a:hover{background:var(--canvas);color:var(--ink)}
+.navlinks a.on{background:var(--ink);color:var(--paper)}
+.navlinks a.locked{opacity:.45;pointer-events:none}
+.navprog{font-family:'Space Mono',monospace;font-size:12px;color:var(--ink-faint);white-space:nowrap}
+.navprog b{color:var(--good)}
+@media(max-width:600px){.navprog{display:none}.topnav .bar{gap:10px}.navlinks a{padding:7px 9px}}
+
+/* ---------- Views ---------- */
+.view{display:none}
+.view.active{display:block;animation:fade .35s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ---------- Home ---------- */
+.hero{padding:52px 0 30px}
+.kicker{font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-faint);display:flex;gap:10px;align-items:center}
+.kicker .dot{width:7px;height:7px;border-radius:50%;background:var(--good);box-shadow:0 0 0 3px var(--good-bg)}
+h1{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(34px,6.5vw,62px);line-height:1;letter-spacing:-.025em;margin:16px 0 12px}
+h1 em{font-style:normal;color:var(--good)}
+.lede{color:var(--ink-soft);max-width:62ch;font-size:17px}
+.cta-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:26px}
+.btn{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;border:0;border-radius:11px;padding:13px 22px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:transform .12s,filter .12s,box-shadow .12s}
+.btn.primary{background:var(--ink);color:var(--paper);box-shadow:var(--shadow)}
+.btn.primary:hover{transform:translateY(-2px);filter:brightness(1.08)}
+.btn.ghost{background:var(--paper);color:var(--ink);border:1px solid var(--line)}
+.btn.ghost:hover{border-color:var(--line-strong)}
+.btn:focus-visible{outline:2px solid var(--good);outline-offset:2px}
+.namefield{display:flex;flex-direction:column;gap:4px}
+.namefield label{font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint)}
+.namefield input{font-family:'Inter',sans-serif;font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:var(--paper);min-width:220px;color:var(--ink)}
+.nameField input:focus,.namefield input:focus{outline:2px solid var(--good);outline-offset:1px;border-color:var(--good)}
+.meta-row{display:flex;gap:22px;flex-wrap:wrap;margin-top:22px;font-family:'Space Mono',monospace;font-size:12px;color:var(--ink-faint)}
+.meta-row b{color:var(--ink-soft)}
+
+.teaser{background:var(--paper);border:1px solid var(--line);border-radius:14px;margin-top:34px;padding:18px 20px 12px;box-shadow:var(--shadow)}
+.teaser-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:4px}
+.teaser-head .lab{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint)}
+.teaser-head .score{font-family:'Space Mono',monospace;font-size:13px;color:var(--ink-soft)}
+.teaser-head .score b{color:var(--ink);font-weight:700}
+svg.chartsvg{width:100%;height:128px;display:block}
+
+.sec-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft);margin:48px 0 16px;display:flex;align-items:center;gap:12px}
+.sec-title::after{content:"";flex:1;height:1px;background:var(--line)}
+
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:680px){.steps{grid-template-columns:1fr}}
+.stepcard{background:var(--paper);border:1px solid var(--line);border-radius:13px;padding:18px;box-shadow:var(--shadow)}
+.stepcard .no{font-family:'Space Mono',monospace;font-size:12px;color:var(--good);font-weight:700}
+.stepcard h4{font-family:'Space Grotesk',sans-serif;font-size:16px;margin:6px 0 5px}
+.stepcard p{font-size:13.5px;color:var(--ink-soft);margin:0}
+
+.map{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:680px){.map{grid-template-columns:1fr}}
+.mapcard{position:relative;background:var(--paper);border:1px solid var(--line);border-radius:13px;padding:18px 18px 18px 20px;box-shadow:var(--shadow);cursor:pointer;text-align:left;font-family:inherit;transition:transform .14s,box-shadow .14s,border-color .14s;overflow:hidden}
+.mapcard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--ac)}
+.mapcard:hover:not(:disabled){transform:translateY(-3px);box-shadow:0 10px 30px rgba(22,33,28,.1)}
+.mapcard:disabled{cursor:not-allowed;opacity:.55}
+.mapcard:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.mapcard .top{display:flex;align-items:center;gap:12px;margin-bottom:9px}
+.mapcard .badge{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:21px;color:#fff;flex:none;background:var(--ac)}
+.mapcard .ph{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px}
+.mapcard .st{font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);margin-left:auto}
+.mapcard .st.done{color:var(--good)}
+.mapcard p{font-size:13.5px;color:var(--ink-soft);margin:0}
+.mapcard .lock{position:absolute;right:16px;bottom:14px;font-size:12px;color:var(--ink-faint)}
+
+/* ---------- shared component styles (from trainer) ---------- */
+.tracker{background:var(--paper);border:1px solid var(--line);border-radius:14px;margin-top:8px;padding:18px 20px 12px;box-shadow:var(--shadow)}
+.tracker-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.tracker-head .lab{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint)}
+.tracker-head .score{font-family:'Space Mono',monospace;font-size:13px;color:var(--ink-soft)}
+.tracker-head .score b{color:var(--ink);font-weight:700}
+.stepper{display:flex;gap:8px;margin:18px 0 8px;flex-wrap:wrap}
+.step{flex:1 1 0;min-width:120px;border:1px solid var(--line);background:var(--paper);border-radius:11px;padding:11px 13px;cursor:pointer;text-align:left;transition:transform .15s,border-color .15s,box-shadow .15s;position:relative;font-family:inherit}
+.step:hover:not(:disabled){transform:translateY(-2px);box-shadow:var(--shadow)}
+.step:disabled{cursor:not-allowed;opacity:.5}
+.step:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.step .ltr{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:22px;line-height:1}
+.step .nm{font-size:12.5px;color:var(--ink-soft);margin-top:3px;font-weight:500}
+.step .pct{font-family:'Space Mono',monospace;font-size:11px;color:var(--ink-faint);margin-top:4px}
+.step[data-on="1"]{border-color:var(--ac);box-shadow:inset 0 0 0 1px var(--ac)}
+.step[data-on="1"] .ltr{color:var(--ac)}
+.step .tick{position:absolute;top:9px;right:11px;color:var(--good);opacity:0;font-size:13px}
+.step[data-done="1"] .tick{opacity:1}
+.step .bar{position:absolute;left:0;bottom:0;height:3px;width:100%;background:transparent;border-radius:0 0 11px 11px;overflow:hidden}
+.step .bar i{display:block;height:100%;width:0;background:var(--ac);transition:width .5s ease}
+
+.module{margin-top:26px}
+.phase-head{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+.badge{width:46px;height:46px;border-radius:11px;display:grid;place-items:center;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:24px;color:#fff;flex:none}
+.phase-head .meta .eye{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-faint)}
+.phase-head .meta h2{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:26px;margin:1px 0 0;letter-spacing:-.01em}
+
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:22px 24px;box-shadow:var(--shadow);margin-top:16px}
+.tag{display:inline-flex;align-items:center;gap:7px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ac);font-weight:700;margin-bottom:10px}
+.tag::before{content:"";width:18px;height:2px;background:var(--ac)}
+.challenge{border-left:3px solid var(--ac);background:linear-gradient(90deg,color-mix(in srgb,var(--ac) 7%,transparent),transparent 60%)}
+.challenge p{margin:0;font-size:15.5px}
+.challenge .who{font-family:'Space Mono',monospace;font-size:12px;color:var(--ink-soft);margin-top:10px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:680px){.cols{grid-template-columns:1fr}}
+.mini h3{font-family:'Space Grotesk',sans-serif;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 9px}
+.mini ul{margin:0;padding:0;list-style:none}
+.mini li{font-size:14px;padding:5px 0 5px 20px;position:relative;border-bottom:1px dashed var(--line)}
+.mini li:last-child{border-bottom:0}
+.mini li::before{content:"";position:absolute;left:2px;top:12px;width:7px;height:7px;border:1.5px solid var(--ac);border-radius:2px}
+.tools li::before{border-radius:50%}
+.example .ex-body{font-size:14.5px;color:var(--ink)}
+.example .ex-body p{margin:0 0 10px}
+.calc{font-family:'Space Mono',monospace;font-size:13px;background:var(--canvas);border:1px solid var(--line);border-radius:9px;padding:12px 14px;margin:10px 0;overflow-x:auto;line-height:1.7;white-space:pre-wrap}
+.calc .r{color:var(--ac);font-weight:700}
+table.data{width:100%;border-collapse:collapse;font-family:'Space Mono',monospace;font-size:12.5px;margin:8px 0}
+table.data th,table.data td{border:1px solid var(--line);padding:6px 9px;text-align:left}
+table.data th{background:var(--canvas);font-weight:700;color:var(--ink-soft);text-transform:uppercase;font-size:10.5px;letter-spacing:.08em}
+.pill{display:inline-block;font-family:'Space Mono',monospace;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:700}
+.pill.warn{background:#FBF0DC;color:#8A6410}
+.pill.ng{background:var(--bad-bg);color:var(--bad)}
+.pill.ok{background:var(--good-bg);color:var(--good)}
+.quiz-head{display:flex;justify-content:space-between;align-items:baseline;margin-top:30px;margin-bottom:4px;flex-wrap:wrap;gap:8px}
+.quiz-head h3{font-family:'Space Grotesk',sans-serif;font-size:20px;margin:0;letter-spacing:-.01em}
+.quiz-head .cnt{font-family:'Space Mono',monospace;font-size:12px;color:var(--ink-faint)}
+.q{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:20px 22px;box-shadow:var(--shadow);margin-top:14px}
+.q .qn{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.16em;color:var(--ac);font-weight:700}
+.q .scn{font-size:13.5px;color:var(--ink-soft);background:var(--canvas);border:1px solid var(--line);border-left:3px solid var(--line-strong);border-radius:8px;padding:9px 12px;margin:9px 0 4px}
+.q .qt{font-weight:600;font-size:16px;margin:9px 0 14px;font-family:'Space Grotesk',sans-serif}
+.opt{display:block;width:100%;text-align:left;font-family:inherit;font-size:14.5px;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 14px 12px 44px;margin:8px 0;cursor:pointer;position:relative;transition:border-color .12s,background .12s}
+.opt:hover:not(:disabled){border-color:var(--ac);background:color-mix(in srgb,var(--ac) 4%,var(--paper))}
+.opt:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.opt:disabled{cursor:default}
+.opt .key{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:22px;height:22px;border:1.5px solid var(--line-strong);border-radius:6px;display:grid;place-items:center;font-family:'Space Mono',monospace;font-size:12px;font-weight:700;color:var(--ink-faint)}
+.opt.correct{border-color:var(--good);background:var(--good-bg)}
+.opt.correct .key{border-color:var(--good);background:var(--good);color:#fff}
+.opt.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.opt.wrong .key{border-color:var(--bad);background:var(--bad);color:#fff}
+.why{font-size:13.5px;line-height:1.5;border-radius:9px;padding:11px 14px;margin-top:6px;display:none}
+.why.show{display:block}
+.why b{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:3px}
+.why.r{background:var(--good-bg);color:#1e4f3c}
+.why.r b{color:var(--good)}
+.why.w{background:var(--bad-bg);color:#702b20}
+.why.w b{color:var(--bad)}
+.done-banner{display:none;margin-top:18px;border:1px solid var(--ac);background:color-mix(in srgb,var(--ac) 8%,var(--paper));border-radius:14px;padding:18px 22px;align-items:center;gap:16px}
+.done-banner.show{display:flex}
+.done-banner .scorebig{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:34px;color:var(--ac);line-height:1}
+.done-banner .txt{flex:1}
+.done-banner .txt b{font-size:15px}
+.done-banner .txt p{margin:2px 0 0;font-size:13.5px;color:var(--ink-soft)}
+.nextbtn{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;background:var(--ac);color:#fff;border:0;border-radius:10px;padding:11px 18px;cursor:pointer;white-space:nowrap;transition:transform .12s,filter .12s}
+.nextbtn:hover{transform:translateY(-1px);filter:brightness(1.06)}
+.nextbtn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.footer{margin-top:40px;padding:18px 0 90px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.reset{font-family:'Space Mono',monospace;font-size:12px;color:var(--ink-faint);background:none;border:1px solid var(--line);border-radius:8px;padding:7px 12px;cursor:pointer}
+.reset:hover{color:var(--ink);border-color:var(--line-strong)}
+.foot-note{font-family:'Space Mono',monospace;font-size:11px;color:var(--ink-faint)}
+
+/* ---------- Certificate ---------- */
+.cert-wrap{padding:44px 0 90px}
+.cert-locked{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:34px;text-align:center;box-shadow:var(--shadow);max-width:620px;margin:0 auto}
+.cert-locked h2{font-family:'Space Grotesk',sans-serif;font-size:24px;margin:8px 0 6px}
+.cert-locked p{color:var(--ink-soft);font-size:15px;margin:0 auto 20px;max-width:44ch}
+.cert-locked .prog{font-family:'Space Mono',monospace;font-size:13px;color:var(--ink-soft);margin-bottom:8px}
+.remain{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.remain span{font-family:'Space Mono',monospace;font-size:12px;padding:6px 12px;border-radius:8px;border:1px solid var(--line)}
+.remain span.done{background:var(--good-bg);color:var(--good);border-color:var(--good)}
+.remain span.todo{color:var(--ink-faint)}
+
+.certificate{background:var(--paper);border:1px solid var(--line-strong);border-radius:8px;max-width:760px;margin:0 auto;padding:8px;box-shadow:0 12px 40px rgba(22,33,28,.12)}
+.cert-inner{border:2px solid var(--ink);border-radius:5px;padding:44px 48px;position:relative;text-align:center}
+.cert-inner::before,.cert-inner::after{content:"";position:absolute;width:26px;height:26px;border:2px solid var(--good)}
+.cert-inner::before{top:12px;left:12px;border-right:0;border-bottom:0}
+.cert-inner::after{bottom:12px;right:12px;border-left:0;border-top:0}
+.cert-eyebrow{font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.32em;text-transform:uppercase;color:var(--ink-faint)}
+.cert-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:34px;letter-spacing:-.02em;margin:6px 0 2px}
+.cert-title span{color:var(--good)}
+.cert-pre{font-size:14px;color:var(--ink-soft);margin:26px 0 6px;font-family:'Space Mono',monospace;letter-spacing:.05em}
+.cert-name{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:32px;color:var(--ink);border-bottom:1.5px solid var(--line-strong);display:inline-block;padding:0 26px 6px;min-width:280px}
+.cert-body{font-size:14.5px;color:var(--ink-soft);max-width:52ch;margin:18px auto 0;line-height:1.6}
+.cert-body b{color:var(--ink)}
+.cert-stats{display:flex;justify-content:center;gap:32px;margin:26px 0 8px;flex-wrap:wrap}
+.cert-stat{text-align:center}
+.cert-stat .v{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:26px;color:var(--good)}
+.cert-stat .k{font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin-top:2px}
+.cert-phases{display:flex;justify-content:center;gap:8px;margin:14px 0 6px;flex-wrap:wrap}
+.cert-phases span{font-family:'Space Mono',monospace;font-size:11px;padding:4px 10px;border-radius:20px;background:var(--canvas);border:1px solid var(--line)}
+.cert-foot{display:flex;justify-content:space-between;align-items:flex-end;margin-top:34px;gap:20px}
+.cert-sign{text-align:center;flex:1}
+.cert-sign .line{border-top:1.5px solid var(--ink);padding-top:6px;font-family:'Space Mono',monospace;font-size:11px;color:var(--ink-soft);letter-spacing:.08em}
+.cert-sign .who{font-family:'Space Grotesk',sans-serif;font-size:14px;color:var(--ink);margin-bottom:3px}
+.seal{width:74px;height:74px;flex:none}
+.cert-actions{display:flex;gap:12px;justify-content:center;margin:26px auto 0;flex-wrap:wrap}
+.cert-actions .namefield input{min-width:260px}
+
+@media print{
+  .topnav,.no-print,.footer{display:none!important}
+  body{background:#fff;background-image:none}
+  .view{display:none!important}
+  #view-cert{display:block!important;animation:none}
+  .cert-locked{display:none!important}
+  .cert-actions{display:none!important}
+  .cert-wrap{padding:0}
+  .certificate{box-shadow:none;border:0;margin:0;max-width:100%}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<nav class="topnav no-print">
+  <div class="bar">
+    <a class="brand" href="#home">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="1" y="1" width="20" height="20" rx="5" fill="#16211C"/><polyline points="4,15 8,11 12,13 18,5" fill="none" stroke="#2F6F57" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="8" cy="11" r="1.6" fill="#FBFCFA"/><circle cx="18" cy="5" r="1.6" fill="#FBFCFA"/></svg>
+      DMAIC Challenge Lab
+    </a>
+    <div class="navlinks" id="navlinks">
+      <a href="#home" data-view="home">Overview</a>
+      <a href="#train" data-view="train">Train</a>
+      <a href="#certificate" data-view="cert">Certificate</a>
+    </div>
+    <div class="navprog"><b id="navPct">0%</b> complete</div>
+  </div>
+</nav>
+
+<main>
+
+<!-- ============ HOME ============ -->
+<section id="view-home" class="view">
+  <div class="wrap">
+    <div class="hero">
+      <div class="kicker"><span class="dot"></span> Challenge-Based Lean Six Sigma · Self-Paced</div>
+      <h1>The DMAIC <em>Challenge Lab</em></h1>
+      <p class="lede">One failing production line. Five phases. You make the calls a Black Belt makes — frame the problem, trust the data, find the real cause, prove the fix, and lock it in. Every phase ends with a scenario questionnaire that grades and explains each answer, and finishes with a certificate of completion.</p>
+
+      <div class="cta-row">
+        <div class="nameField namefield">
+          <label for="nameInput">Your name — appears on your certificate</label>
+          <input id="nameInput" type="text" placeholder="e.g. Jordan Alvarez" autocomplete="name">
+        </div>
+        <a class="btn primary" id="startBtn" href="#train">Begin training →</a>
+      </div>
+
+      <div class="meta-row">
+        <span><b>5</b> modules · <b>25</b> scenario questions</span>
+        <span>≈ <b>45–60 min</b> total</span>
+        <span>Audience: <b>Green/Black Belt candidates &amp; CI teams</b></span>
+        <span>Progress <b>saves automatically</b></span>
+      </div>
+    </div>
+
+    <div class="teaser">
+      <div class="teaser-head">
+        <span class="lab">Your mastery control chart — a point plots as you finish each phase</span>
+        <span class="score">Overall <b id="ovScoreHome">0</b> / <span id="ovTotalHome">25</span></span>
+      </div>
+      <svg class="chartsvg" viewBox="0 0 880 128" preserveAspectRatio="none" aria-label="Progress control chart"></svg>
+    </div>
+
+    <div class="sec-title">How it works</div>
+    <div class="steps">
+      <div class="stepcard"><div class="no">01</div><h4>Take the challenge</h4><p>Each phase drops you into a real situation on Line 7 — a sliding yield, a shaky gauge, a room full of theories.</p></div>
+      <div class="stepcard"><div class="no">02</div><h4>Learn the tools in context</h4><p>Critical DMAIC tools with a worked example — a real Cpk, a t-test, a DOE — not slideware definitions.</p></div>
+      <div class="stepcard"><div class="no">03</div><h4>Prove it &amp; earn the point</h4><p>Answer the scenario questionnaire, get instant feedback on every option, and plot your score on the chart.</p></div>
+    </div>
+
+    <div class="sec-title">The five modules</div>
+    <div class="map" id="moduleMap"></div>
+  </div>
+</section>
+
+<!-- ============ TRAIN ============ -->
+<section id="view-train" class="view">
+  <div class="wrap">
+    <div style="padding-top:28px">
+      <div class="tracker">
+        <div class="tracker-head">
+          <span class="lab">Mastery control chart — plotted as you complete each phase</span>
+          <span class="score">Overall <b id="ovScore">0</b> / <span id="ovTotal">25</span> correct</span>
+        </div>
+        <svg class="chartsvg" viewBox="0 0 880 128" preserveAspectRatio="none" aria-label="Progress control chart"></svg>
+      </div>
+      <nav class="stepper" id="stepper" aria-label="DMAIC phases"></nav>
+    </div>
+
+    <div id="module" class="module" tabindex="-1"></div>
+
+    <div class="footer">
+      <button class="reset" id="reset">↺ Reset all progress</button>
+      <span class="foot-note">Case file: MERIDIAN ELECTRONICS · Plant 4 · Line 7 · Product EC-200</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CERTIFICATE ============ -->
+<section id="view-cert" class="view">
+  <div class="wrap cert-wrap" id="certContent"></div>
+</section>
+
+</main>
+
+<script>
+const MODULES = [
+{
+  id:"define", letter:"D", name:"Define", ac:"var(--d)", acHex:"#2F6F57",
+  challenge:`First-pass yield on Line 7 has slid from 94% to 86% in two quarters. Customer returns of the EC-200 control module are up 40%, scrap is bleeding margin, and three executives each have a different theory. Before anyone touches the process, your job is to <strong>frame the problem so tightly that the whole team is solving the same thing</strong> — no cause, no solution, just a sharp, measurable gap.`,
+  who:"Sponsor: VP Operations · Process owner: Line 7 Mfg Manager · You: Project lead",
+  objectives:["Translate a vague complaint into a measurable problem statement","Bound scope so the team doesn't boil the ocean","Convert Voice of the Customer into Critical-to-Quality (CTQ) specs","Build a charter that survives executive scrutiny"],
+  tools:["Project charter","SIPOC","Problem & goal statement","VOC → CTQ tree","Pareto for project selection","Kano model"],
+  example:{
+    title:"Anatomy of a problem statement that holds up",
+    body:`<p>Three drafts hit your desk. Only one is a <em>problem</em> statement — the others smuggle in a cause or a fix:</p>
+    <table class="data"><tr><th>Draft</th><th>Verdict</th></tr>
+    <tr><td>"Line 7 fails because the new solder paste is bad."</td><td><span class="pill ng">Cause baked in</span></td></tr>
+    <tr><td>"Line 7 needs a new reflow oven."</td><td><span class="pill ng">Solution baked in</span></td></tr>
+    <tr><td>"From Jan–Jun, EC-200 first-pass yield on Line 7 fell from 94% to 86% (−8 pts), driving $420K scrap/rework and a 40% rise in returns."</td><td><span class="pill ok">Measurable · bounded · neutral</span></td></tr></table>
+    <p>The winning statement names <b>what</b>, <b>where</b>, <b>when</b>, <b>how big</b>, and the <b>business pain</b> — and stays silent on why and how. That silence is deliberate: assume the cause in Define and you'll spend Measure and Analyze confirming your bias.</p>`
+  },
+  questions:[
+    {qn:"Q1", qt:"Which of these is a properly framed problem statement?",
+     opts:[
+       {t:"Line 7 yield is poor and management is unhappy with the team.",c:false,w:"Vague and subjective — 'poor' and 'unhappy' aren't measurable, and there's no baseline, timeframe, or business impact to anchor the project."},
+       {t:"From Q1–Q2, EC-200 first-pass yield on Line 7 dropped 94%→86%, costing $420K in scrap/rework and a 40% rise in returns.",c:true,w:"Correct. It states what, where, when, magnitude, and business impact — and names no cause or solution. That's the whole job of a Define problem statement."},
+       {t:"Line 7 yield is falling because Operator B isn't following the work instruction.",c:false,w:"This embeds a presumed cause. You haven't measured anything yet — locking onto a person before Analyze is exactly the bias Define exists to prevent."},
+       {t:"We will install a new reflow oven on Line 7 to restore yield to 94%.",c:false,w:"That's a solution statement masquerading as a problem. Pre-selecting the fix skips Measure and Analyze entirely."}
+     ]},
+    {qn:"Q2", scn:"A customer tells your sales team: 'The EC-200 just isn't reliable enough — it keeps tripping out in the field.'",
+     qt:"Which is the correctly translated CTQ?",
+     opts:[
+       {t:"Make the EC-200 more reliable.",c:false,w:"Still Voice of the Customer, not a CTQ. 'More reliable' isn't measurable, so you can't tell if you've succeeded."},
+       {t:"Output voltage on the 5V rail must stay within 5.00V ± 0.10V under rated load.",c:true,w:"Correct. A CTQ converts the customer's words into a specific, measurable characteristic with a spec limit — something you can put a number and a tolerance on."},
+       {t:"Reduce customer complaints by improving quality.",c:false,w:"This is a goal stated in vague terms, not a measurable product/process characteristic. 'Quality' is the thing you're trying to define, not a CTQ."},
+       {t:"Use a higher-grade capacitor in the power stage.",c:false,w:"That's a solution. A CTQ describes what 'good' looks like to the customer, not how you'll achieve it."}
+     ]},
+    {qn:"Q3", scn:"You're building the SIPOC for the EC-200 final-test step.",
+     qt:"Which item correctly belongs under OUTPUTS?",
+     opts:[
+       {t:"Calibrated voltage tester",c:false,w:"That's an Input (a resource the process consumes), not an Output."},
+       {t:"Reflow operator",c:false,w:"A person staffing the step is a resource/Input, not what the step produces."},
+       {t:"Tested EC-200 module with pass/fail disposition and recorded voltage reading",c:true,w:"Correct. An Output is the tangible result the process hands to the next step or customer — here, a tested unit plus its disposition and data."},
+       {t:"Distribution warehouse",c:false,w:"That's a Customer (who receives the output), the last column of SIPOC, not the Output itself."}
+     ]},
+    {qn:"Q4", scn:"Mid-project, the sponsor asks you to 'also fix the packaging line and the supplier portal while you're at it.'",
+     qt:"What's the right move?",
+     opts:[
+       {t:"Agree — more scope shows ambition and pleases the sponsor.",c:false,w:"This is scope creep, the #1 killer of DMAIC projects. Tripling the boundaries dilutes focus and timeline."},
+       {t:"Refer to the charter's scope boundaries, keep this project on Line 7 yield, and log the other items as separate candidate projects.",c:true,w:"Correct. The charter exists precisely so scope is a documented agreement, not a moving target. Park new ideas in the project funnel rather than absorbing them."},
+       {t:"Quietly ignore the request and hope it's forgotten.",c:false,w:"Avoiding the conversation erodes sponsor trust. Boundaries should be negotiated openly using the charter, not dodged."},
+       {t:"Restart Define from scratch to cover all three areas.",c:false,w:"Restarting throws away momentum and still doesn't solve the over-scope problem — three problems in one charter is unmanageable."}
+     ]},
+    {qn:"Q5", scn:"Two improvement ideas compete for the team's time.",
+     qt:"You have a Pareto chart of defect categories. How should it drive project selection?",
+     opts:[
+       {t:"Tackle the defect category with the most colorful bar.",c:false,w:"Pareto isn't about aesthetics. The point is impact concentration, not visual appeal."},
+       {t:"Attack the 'vital few' tall bars on the left that account for ~80% of the loss.",c:true,w:"Correct. The Pareto principle focuses effort on the few categories driving most of the pain, giving the biggest return for the project's effort."},
+       {t:"Spread effort evenly across every defect category to be fair.",c:false,w:"Even spreading is the opposite of Pareto thinking — it wastes effort on the 'trivial many' that barely move the result."},
+       {t:"Start with the smallest bar because it's the easiest win.",c:false,w:"Easy isn't the same as impactful. A quick win on a trivial category won't close the yield gap."}
+     ]}
+  ]
+},
+{
+  id:"measure", letter:"M", name:"Measure", ac:"var(--m)", acHex:"#2A6F97",
+  challenge:`The charter is signed. Now the trap: half the "defects" on Line 7 might be measurement noise. Two inspectors disagree on borderline units, and nobody has validated the voltage tester. Before you trust a single data point, you have to <strong>prove the measurement system is sound, then establish an honest baseline</strong> — because you can't improve a number you can't trust.`,
+  who:"Quality engineer runs the MSA · You set the data collection plan",
+  objectives:["Write operational definitions so any inspector gets the same answer","Run and interpret a Gage R&R (MSA)","Quantify the baseline: Cpk, DPMO, and sigma level","Distinguish continuous from attribute data and sample correctly"],
+  tools:["Data collection plan","Operational definitions","Gage R&R / MSA","Process capability (Cp, Cpk, Pp, Ppk)","DPMO & sigma level","Sampling strategy"],
+  example:{
+    title:"Two numbers that decide whether your data is real",
+    body:`<p><b>Step 1 — Is the gauge trustworthy?</b> The Gage R&R on the voltage tester returns:</p>
+    <div class="calc">%Study Variation (Gage R&R) = <span class="r">28%</span>
+&lt; 10% = acceptable · 10–30% = marginal · &gt; 30% = unacceptable</div>
+    <p>At 28% the system is <span class="pill warn">marginal</span> — usable for triage but you'll fix it before drawing fine conclusions, because nearly a third of the variation you "see" is the gauge, not the product.</p>
+    <p><b>Step 2 — How capable is the process?</b> Final-test voltage on 100 units: mean = 5.02V, s = 0.045V, spec = 4.90–5.10V.</p>
+    <div class="calc">Cpk = min[(USL−x̄), (x̄−LSL)] / (3s)
+    = min[(5.10−5.02), (5.02−4.90)] / (3 × 0.045)
+    = min[0.08, 0.12] / 0.135
+    = 0.08 / 0.135 = <span class="r">0.59</span></div>
+    <p>A capable process needs Cpk ≥ 1.33. At <span class="pill ng">Cpk 0.59</span> the process is badly off — and the mean is shifted high (closer to the upper limit), telling you <em>where</em> to look later. This is your baseline; every future gain gets measured against it.</p>`
+  },
+  questions:[
+    {qn:"Q1", scn:"Inspector A passes a borderline unit; Inspector B scraps the identical unit.",
+     qt:"What's the root fix?",
+     opts:[
+       {t:"Tell both inspectors to 'use better judgment.'",c:false,w:"Judgment is exactly the problem — it's subjective. Vague coaching won't make two people agree on a borderline call."},
+       {t:"Write an operational definition with a precise, repeatable accept/reject criterion and a reference standard.",c:true,w:"Correct. An operational definition removes ambiguity so any inspector reaches the same decision on the same unit — the foundation of repeatable measurement."},
+       {t:"Average the two inspectors' verdicts.",c:false,w:"You can't average a pass and a fail into a meaningful answer. This masks the disagreement instead of resolving it."},
+       {t:"Always trust the more senior inspector.",c:false,w:"Seniority isn't a measurement system. The goal is a definition so clear that experience level doesn't change the outcome."}
+     ]},
+    {qn:"Q2", scn:"Your Gage R&R reports %Study Variation = 28%.",
+     qt:"How do you interpret it?",
+     opts:[
+       {t:"Excellent — well under 100%, so the gauge is fine.",c:false,w:"100% is not the benchmark. The accepted thresholds are <10% acceptable, 10–30% marginal, >30% unacceptable."},
+       {t:"Marginal — usable for now, but improve the measurement system before trusting fine distinctions.",c:true,w:"Correct. 28% sits in the 10–30% marginal band: a meaningful chunk of observed variation is the gauge itself, so tighten it before betting conclusions on small differences."},
+       {t:"Unacceptable — stop all work immediately.",c:false,w:"28% is marginal, not over the 30% unacceptable threshold. You can proceed with caution while planning to improve it."},
+       {t:"Irrelevant — capability matters, not the gauge.",c:false,w:"Capability is meaningless if the measurement system is noisy. MSA must pass first, or your Cpk is partly measuring the gauge."}
+     ]},
+    {qn:"Q3", scn:"Voltage: mean 5.02V, s 0.045V, spec 4.90–5.10V → Cpk = 0.59.",
+     qt:"What does this tell you?",
+     opts:[
+       {t:"The process is capable and centered.",c:false,w:"Far from it. Capable means Cpk ≥ 1.33; 0.59 is poor, and the mean (5.02) sits off-center toward the upper limit."},
+       {t:"The process is not capable, and the off-center mean points to where variation is leaking.",c:true,w:"Correct. Cpk 0.59 « 1.33 means significant out-of-spec risk, and because (USL−x̄) is the limiting term, the process is running high — a clue for Analyze."},
+       {t:"Cpk can't be computed without the DPMO first.",c:false,w:"Cpk comes straight from mean, standard deviation, and spec limits. DPMO is a separate way to express the same poor capability."},
+       {t:"A Cpk of 0.59 is acceptable for electronics.",c:false,w:"No industry treats 0.59 as acceptable. The universal bar for a capable process is 1.33 (and 1.67 for safety-critical)."}
+     ]},
+    {qn:"Q4", qt:"On Line 7 you record two things: the 5V-rail voltage reading, and whether each unit passes or fails final test. How are these classified?",
+     opts:[
+       {t:"Both are attribute data.",c:false,w:"Only the pass/fail is attribute. Voltage is measured on a continuous scale, so calling it attribute throws away resolution."},
+       {t:"Voltage is continuous data; pass/fail is attribute data.",c:true,w:"Correct. Voltage takes any value on a scale (continuous); pass/fail is a discrete category (attribute). The distinction drives which charts and tests you can use later."},
+       {t:"Both are continuous data.",c:false,w:"Pass/fail has only two categories — it's attribute, not continuous. You can't compute a meaningful mean of 'pass.'"},
+       {t:"The classification doesn't matter for analysis.",c:false,w:"It matters enormously. Data type determines your control chart (X-bar/R vs p-chart) and your hypothesis test — get it wrong and the whole analysis is invalid."}
+     ]},
+    {qn:"Q5", scn:"To save time, a technician samples the first 30 units off the line each Monday morning.",
+     qt:"What's the flaw?",
+     opts:[
+       {t:"Nothing — 30 units is a healthy sample size.",c:false,w:"Sample size isn't the issue; representativeness is. A biased sample of any size gives a biased baseline."},
+       {t:"It's a convenience sample biased to one shift/condition, so it won't represent the full process.",c:true,w:"Correct. Sampling only Monday-morning startup misses other shifts, operators, and machine warm-up states — your baseline would be systematically skewed."},
+       {t:"30 units is too many; sample only 5.",c:false,w:"Cutting the sample makes representativeness worse, not better. The problem is when/how units are chosen, not the count."},
+       {t:"Sampling should always be 100% inspection.",c:false,w:"100% inspection is costly and often unnecessary; well-designed random/stratified sampling represents the process without inspecting everything."}
+     ]}
+  ]
+},
+{
+  id:"analyze", letter:"A", name:"Analyze", ac:"var(--a)", acHex:"#9E4A2F",
+  challenge:`The measurement system is fixed and the baseline is brutal: Cpk 0.59, running high. The fishbone has 14 candidate causes and everyone's favorite theory. Your job is to <strong>let data convict the real root cause</strong> — separate the suspects you can prove from the ones you merely believe, using hypothesis tests instead of opinions.`,
+  who:"You run the stats · The line team brainstorms causes · Data decides",
+  objectives:["Use fishbone + 5 Whys to surface and drill candidate causes","Pick the correct hypothesis test for the data type","Read a p-value without misinterpreting it","Separate proven root causes from assumed ones"],
+  tools:["Fishbone (Ishikawa)","5 Whys","Hypothesis testing (t-test, ANOVA, chi-square)","Regression & correlation","FMEA","Multi-vari / graphical analysis"],
+  example:{
+    title:"From suspicion to a proven root cause",
+    body:`<p>The team suspects Reflow Oven 2 runs hotter than Oven 1, pushing voltage high. Voltage is continuous and you're comparing two groups, so you run a <b>2-sample t-test</b>:</p>
+    <table class="data"><tr><th></th><th>Oven 1</th><th>Oven 2</th></tr>
+    <tr><td>Mean voltage</td><td>4.99 V</td><td>5.05 V</td></tr>
+    <tr><td>p-value</td><td colspan="2">0.003</td></tr></table>
+    <div class="calc">H₀: mean(Oven 1) = mean(Oven 2)
+p = 0.003 &lt; α = 0.05  →  <span class="r">reject H₀</span></div>
+    <p>The difference is real, not chance. Now <b>5 Whys</b> drills past the symptom:</p>
+    <p style="font-family:'Space Mono',monospace;font-size:12.5px">Voltage high → why? Oven 2 peak temp too high → why? Zone-3 setpoint drifted → why? Thermocouple out of cal → why? <span class="r">No PM trigger on thermocouple calibration ← ROOT CAUSE</span></p>
+    <p>The data confirmed <em>which</em> oven; the 5 Whys found <em>why</em>. Stopping at "Oven 2 is hot" would have fixed a symptom, not the cause.</p>`
+  },
+  questions:[
+    {qn:"Q1", qt:"What's the difference in purpose between a fishbone diagram and 5 Whys?",
+     opts:[
+       {t:"They're identical tools with different names.",c:false,w:"They're complementary, not interchangeable. One spreads wide; the other drills deep."},
+       {t:"Fishbone spreads breadth across cause categories; 5 Whys drills depth on one chain to the root.",c:true,w:"Correct. Fishbone brainstorms many candidate causes across categories (Man, Machine, Method, Material, Measurement, Environment); 5 Whys takes one promising branch and digs down to the systemic root."},
+       {t:"Fishbone proves causes statistically; 5 Whys collects data.",c:false,w:"Neither proves causes by itself — both are structuring tools. Proof comes from hypothesis testing on data."},
+       {t:"5 Whys is only for safety incidents.",c:false,w:"5 Whys applies to any root-cause search, not just safety. It's a general drill-down technique."}
+     ]},
+    {qn:"Q2", scn:"You want to know if mean voltage differs between Oven 1 and Oven 2. Voltage is continuous; you have two groups.",
+     qt:"Which test fits?",
+     opts:[
+       {t:"Chi-square test of independence.",c:false,w:"Chi-square is for categorical/attribute data in a contingency table — wrong for comparing two continuous means."},
+       {t:"Two-sample t-test.",c:true,w:"Correct. Comparing the means of one continuous variable across two groups is the textbook use of a 2-sample t-test."},
+       {t:"One-way ANOVA only.",c:false,w:"ANOVA compares 3+ group means. For exactly two groups the t-test is the direct choice (ANOVA would give the same result but is overkill here)."},
+       {t:"Simple linear regression.",c:false,w:"Regression models a continuous response against a continuous predictor. 'Which oven' is a two-level category, so a t-test is the right comparison."}
+     ]},
+    {qn:"Q3", scn:"The t-test returns p = 0.003 with α = 0.05.",
+     qt:"What does this correctly mean?",
+     opts:[
+       {t:"There's a 0.3% chance the ovens are actually the same.",c:false,w:"A classic misread. The p-value is NOT the probability the null is true. It's the probability of seeing data this extreme IF the null were true."},
+       {t:"The data are very unlikely under 'no difference,' so you reject H₀ and conclude the means differ.",c:true,w:"Correct. p = 0.003 means results this extreme would be rare if the ovens were identical; since p < α you reject the null and treat the difference as real."},
+       {t:"p = 0.003 proves Oven 2 causes the high voltage with certainty.",c:false,w:"Statistical significance isn't proof of causation, and nothing is 'certain.' It's strong evidence of a difference that warrants confirmation."},
+       {t:"Since p < 0.05, no further investigation is needed.",c:false,w:"Significance flags a difference to pursue — you still drill to the mechanism (5 Whys) and verify before acting."}
+     ]},
+    {qn:"Q4", scn:"Someone notes that weeks with higher cafeteria coffee sales also had higher defect rates, and proposes limiting coffee.",
+     qt:"What's the analytical error?",
+     opts:[
+       {t:"None — correlation is sufficient to act.",c:false,w:"Correlation alone never justifies action on a cause. You'd be tampering based on a coincidence."},
+       {t:"Confusing correlation with causation; the link is likely coincidental or driven by a lurking variable.",c:true,w:"Correct. Two things moving together doesn't mean one causes the other — production volume, season, or staffing could drive both. You'd test a plausible mechanism before believing it."},
+       {t:"The sample of weeks was too small to chart.",c:false,w:"Sample size isn't the core flaw here; the logic of inferring cause from correlation is. Even a large dataset wouldn't make coffee a root cause."},
+       {t:"Coffee should be increased, not limited.",c:false,w:"Both directions make the same mistake — acting on a spurious correlation as if it were causal."}
+     ]},
+    {qn:"Q5", qt:"At α = 0.05, you reject H₀ for a cause that is actually NOT real. What error did you make?",
+     opts:[
+       {t:"Type II error (β) — missing a real effect.",c:false,w:"Type II is the opposite: failing to detect an effect that IS real. Here you detected one that isn't."},
+       {t:"Type I error (α) — a false positive; flagging a cause that isn't truly there.",c:true,w:"Correct. Rejecting a true null is a Type I (false-positive) error, and α = 0.05 is exactly the risk you accepted of doing so. In Analyze this means chasing a phantom cause."},
+       {t:"A sampling error unrelated to hypothesis testing.",c:false,w:"This is specifically the α-risk built into the test, not a generic sampling issue."},
+       {t:"No error — rejecting the null is always correct.",c:false,w:"Rejecting can be wrong. The whole point of α and β is that both false positives and false negatives are possible."}
+     ]}
+  ]
+},
+{
+  id:"improve", letter:"I", name:"Improve", ac:"var(--i)", acHex:"#B8862B",
+  challenge:`Root cause confirmed: an uncalibrated thermocouple let Oven 2 drift hot. But "recalibrate it" isn't enough — you need <strong>optimal, robust settings and a fix that prevents the drift from ever reaching product again</strong>. You'll experiment to find the best operating window, mistake-proof the failure mode, and pilot before you bet the line on it.`,
+  who:"You design the experiment · Process engineering runs the pilot",
+  objectives:["Use DOE to find optimal, interaction-aware settings","Design poka-yoke (mistake-proofing) at the failure point","Prioritize solutions by impact vs effort","Pilot and risk-assess before full rollout"],
+  tools:["DOE (factorial design)","Poka-yoke / mistake-proofing","Impact–effort & Pugh matrix","Pilot / confirmation run","FMEA on the new process"],
+  example:{
+    title:"Why one factor at a time would have missed the answer",
+    body:`<p>You suspect peak temperature and solder-paste type both matter. Testing one at a time hides their <b>interaction</b>. A 2×2 factorial reveals it:</p>
+    <table class="data"><tr><th>Peak temp</th><th>Paste A</th><th>Paste B</th></tr>
+    <tr><td>Low (235°C)</td><td>defects 2%</td><td>defects 3%</td></tr>
+    <tr><td>High (250°C)</td><td>defects 9%</td><td>defects 3%</td></tr></table>
+    <div class="calc">Paste A: temp matters a LOT (2% → 9%)
+Paste B: temp barely matters (3% → 3%)
+→ <span class="r">significant temp × paste interaction</span></div>
+    <p>One-factor-at-a-time would have averaged this away. The DOE says: run <b>Paste B</b> for a process that's <em>robust</em> to temperature drift — so even if a thermocouple wanders again, product stays good. Then <b>poka-yoke</b> the original failure: an interlock that locks out the oven if the thermocouple's calibration date expires, so a drifted gauge physically can't run product.</p>`
+  },
+  questions:[
+    {qn:"Q1", qt:"Why is a designed experiment (DOE) preferred over changing one factor at a time (OFAT)?",
+     opts:[
+       {t:"DOE is faster to set up than OFAT.",c:false,w:"Setup isn't the advantage — DOE can take more planning. Its power is what it can detect."},
+       {t:"DOE can detect interactions between factors that OFAT structurally cannot.",c:true,w:"Correct. OFAT holds everything else fixed and misses cases where factors only matter in combination. A factorial DOE varies factors together, exposing interactions like temp × paste."},
+       {t:"DOE removes the need for any statistical analysis.",c:false,w:"DOE relies heavily on analysis (ANOVA, effects plots). It structures the experiment so that analysis is valid and efficient."},
+       {t:"OFAT is illegal under ISO standards.",c:false,w:"OFAT isn't illegal — it's just statistically inefficient and blind to interactions. DOE is preferred on merit, not regulation."}
+     ]},
+    {qn:"Q2", scn:"The root cause was a thermocouple silently drifting out of calibration and still being allowed to run product.",
+     qt:"Which is a true poka-yoke?",
+     opts:[
+       {t:"Add a line in the work instruction reminding operators to check calibration dates.",c:false,w:"A reminder relies on human vigilance — it can be skipped or forgotten. Poka-yoke removes the dependence on memory, not adds to it."},
+       {t:"An interlock that prevents the oven from running if the thermocouple's calibration has expired.",c:true,w:"Correct. True mistake-proofing makes the error physically impossible or impossible to pass downstream. The drifted gauge literally can't run product, regardless of operator attention."},
+       {t:"Retrain operators every quarter on calibration importance.",c:false,w:"Training raises awareness but doesn't prevent the failure mode. People still forget; the error path remains open."},
+       {t:"Put up a poster about quality near the oven.",c:false,w:"Posters are awareness, not error-proofing. They don't stop an out-of-cal gauge from producing bad units."}
+     ]},
+    {qn:"Q3", scn:"Impact–effort grid: Solution X = high impact, low effort. Solution Y = high impact, high effort. Solution Z = low impact, low effort.",
+     qt:"Where do you start?",
+     opts:[
+       {t:"Solution Y — hard work signals it's the most valuable.",c:false,w:"Effort isn't a proxy for value. Y is worth doing, but not first — you'd burn resources before banking an easier high-impact win."},
+       {t:"Solution X — high impact, low effort: the 'just do it' quadrant.",c:true,w:"Correct. High-impact/low-effort solutions are the obvious first moves — biggest return for least cost. Sequence Y next (major project) and treat Z as fill-in."},
+       {t:"Solution Z — low effort feels safest.",c:false,w:"Z is low effort but also low impact ('fill-ins'). Leading with it wastes the opportunity to bank a high-impact win cheaply."},
+       {t:"Do all three simultaneously to finish faster.",c:false,w:"Parallel-firing everything ignores prioritization and overloads the team. The grid exists to sequence, not to skip sequencing."}
+     ]},
+    {qn:"Q4", qt:"The DOE points to new settings. Why pilot before rolling out to all of Line 7?",
+     opts:[
+       {t:"Piloting is a formality; full rollout is always safe after a DOE.",c:false,w:"A DOE is run under controlled conditions. A pilot confirms the gain holds in real production before you expose all output to risk."},
+       {t:"To confirm the predicted improvement holds under real conditions and surface side effects before full-scale risk.",c:true,w:"Correct. A confirmation/pilot run validates the DOE prediction in the live process and catches unintended consequences while the blast radius is still small."},
+       {t:"To give the team something to do while waiting for approval.",c:false,w:"A pilot isn't busywork — it's risk management and validation, with a defined success criterion."},
+       {t:"Because pilots are cheaper than DOEs.",c:false,w:"Cost isn't the reason. The pilot's job is to verify the solution works in reality before committing the whole line."}
+     ]},
+    {qn:"Q5", scn:"Your FMEA on the new process lists failure modes with these RPNs: A = 320, B = 90, C = 45.",
+     qt:"Which gets your mitigation effort first?",
+     opts:[
+       {t:"Failure C — lowest RPN is easiest to close.",c:false,w:"RPN ranks risk, not ease. Closing the lowest-risk item first leaves the biggest exposure open."},
+       {t:"Failure A — highest RPN (Severity × Occurrence × Detection) signals the greatest risk.",c:true,w:"Correct. RPN prioritizes by overall risk; A at 320 is the largest exposure and earns mitigation first (and you'd also fast-track any high-Severity item regardless of RPN)."},
+       {t:"All three equally — RPN shouldn't drive priority.",c:false,w:"The entire purpose of RPN is to drive prioritization. Treating them equally defeats the FMEA."},
+       {t:"Whichever is cheapest to fix.",c:false,w:"Cost can inform sequencing, but FMEA prioritizes by risk first. A high-RPN item shouldn't wait behind a cheap-but-trivial one."}
+     ]}
+  ]
+},
+{
+  id:"control", letter:"C", name:"Control", ac:"var(--c)", acHex:"#5C4D8A",
+  challenge:`The pilot worked: Cpk is up to 1.45 and the interlock has caught two drifting thermocouples. The danger now is silent backsliding once the project team disbands. Your final job is to <strong>make the gain self-sustaining</strong> — monitor the right way, standardize the work, give operators a plan for when signals fire, and hand a stable process to its owner with the savings booked.`,
+  who:"You build the control plan · Process owner inherits and sustains it",
+  objectives:["Select the correct control chart for each data type","Distinguish common-cause from special-cause (avoid tampering)","Build a control plan + OCAP response plan","Standardize work and validate financial results"],
+  tools:["Control plan","SPC chart selection (X-bar/R, I-MR, p, np, c, u)","OCAP / response plan","Standard work","Financial validation & handoff"],
+  example:{
+    title:"Right chart, right reaction",
+    body:`<p>You're monitoring two things. The data type picks the chart:</p>
+    <table class="data"><tr><th>What you track</th><th>Data type</th><th>Chart</th></tr>
+    <tr><td>5V output, subgroups of n=5</td><td>continuous</td><td><b>X̄ &amp; R</b></td></tr>
+    <tr><td>First-pass yield, daily lots of varying size</td><td>attribute (proportion)</td><td><b>p-chart</b></td></tr></table>
+    <p>Then the discipline of <b>not tampering</b>: a point inside the limits with no pattern is <span class="pill ok">common cause</span> — leave it alone. A point beyond a limit or a run/trend is <span class="pill ng">special cause</span> — trigger the response plan.</p>
+    <div class="calc">OCAP (Out-of-Control Action Plan) for a point above UCL:
+1. Quarantine the subgroup
+2. Check thermocouple cal status + oven setpoint
+3. Correct → re-sample → confirm in-control
+4. Log cause; escalate if it recurs</div>
+    <p>Reacting to every wiggle (over-adjusting common cause) actually <em>increases</em> variation — the lesson of Deming's funnel. The chart tells you when to act and when to hold steady.</p>`
+  },
+  questions:[
+    {qn:"Q1", scn:"You monitor 5V-rail output voltage, sampling subgroups of 5 units per hour. Voltage is continuous.",
+     qt:"Which control chart?",
+     opts:[
+       {t:"p-chart",c:false,w:"p-charts are for attribute proportion-defective data. Voltage is continuous, so a p-chart throws away your measurement resolution."},
+       {t:"X̄ & R chart",c:true,w:"Correct. Continuous data collected in rational subgroups (n≈2–9) is the home turf of the X-bar & R chart — X-bar tracks the mean, R tracks within-subgroup spread."},
+       {t:"I-MR (individuals) chart",c:false,w:"I-MR is for individual measurements (subgroup size n=1). You have subgroups of 5, so X-bar & R uses the data better."},
+       {t:"c-chart",c:false,w:"c-charts count defects per unit (attribute). Voltage isn't a count, so a c-chart doesn't apply."}
+     ]},
+    {qn:"Q2", scn:"You track daily first-pass yield, but the lot size varies from 80 to 350 units per day.",
+     qt:"Which control chart fits?",
+     opts:[
+       {t:"np-chart",c:false,w:"np-charts require a constant sample size. Your lots vary (80–350), so np doesn't apply."},
+       {t:"p-chart",c:true,w:"Correct. Proportion defective with varying subgroup sizes calls for a p-chart, which adjusts the control limits for each day's sample size."},
+       {t:"X̄ & R chart",c:false,w:"X-bar & R is for continuous data. Pass/fail proportion is attribute data — wrong chart family."},
+       {t:"I-MR chart",c:false,w:"I-MR handles continuous individual values, not a varying-sample-size proportion. The p-chart is purpose-built for this."}
+     ]},
+    {qn:"Q3", scn:"A control-chart point lands inside the limits, slightly above center, with no run or trend. The operator wants to nudge the oven down 'to be safe.'",
+     qt:"What's correct?",
+     opts:[
+       {t:"Adjust the oven — closer to center is always better.",c:false,w:"This is tampering. Reacting to common-cause noise (a point in-limits, no pattern) actually injects more variation — Deming's funnel experiment proves it."},
+       {t:"Leave it alone — that's common-cause variation; only react to special-cause signals.",c:true,w:"Correct. A single in-limits point with no pattern is normal common-cause noise. You act only on special-cause signals (beyond limits, runs, trends), or you'll over-adjust and worsen the process."},
+       {t:"Stop the line and launch an investigation.",c:false,w:"Stopping for an in-control point wastes capacity and treats noise as a signal. Reserve investigation for genuine out-of-control conditions."},
+       {t:"Re-center by changing the spec limits.",c:false,w:"Spec limits come from the customer, not from chart behavior. Never move specs to make a process look in-control."}
+     ]},
+    {qn:"Q4", qt:"What is the purpose of an OCAP (Out-of-Control Action Plan) in the control plan?",
+     opts:[
+       {t:"To document who to blame when a defect ships.",c:false,w:"An OCAP is forward-looking and corrective, not about blame. Its job is rapid, standardized response."},
+       {t:"To pre-define exactly what the operator does when a chart signals out-of-control, so response is fast and consistent.",c:true,w:"Correct. An OCAP scripts the reaction to a special-cause signal — quarantine, diagnose, correct, confirm — so the right action happens immediately without re-deciding each time."},
+       {t:"To replace the control chart entirely.",c:false,w:"The OCAP works with the chart, not instead of it. The chart detects; the OCAP responds."},
+       {t:"To set the financial targets for the project.",c:false,w:"Financial targets live in the charter/business case. The OCAP is an operational response procedure."}
+     ]},
+    {qn:"Q5", scn:"At handoff, the team debates what will actually keep the gain after they disband.",
+     qt:"What best sustains the improvement?",
+     opts:[
+       {t:"A one-time training session for all operators.",c:false,w:"Training alone fades — people forget, rotate, and leave. Sustainment needs structure that doesn't depend on memory."},
+       {t:"Updated standard work + the poka-yoke interlock + control charts owned by the process owner, with savings booked and reviewed.",c:true,w:"Correct. Durable control combines error-proofing, standardized work, ongoing monitoring, and a named owner accountable for the validated result — so the process holds without the project team."},
+       {t:"Hoping the new settings 'stick' on their own.",c:false,w:"Hope isn't a control method. Without monitoring and ownership, processes drift back to the old normal."},
+       {t:"Keeping the Black Belt permanently assigned to the line.",c:false,w:"That doesn't scale and isn't the point of Control — the gain must survive handoff to the process owner, not depend on the project lead staying."}
+     ]}
+  ]
+}
+];
+
+/* =================== PERSISTENCE (graceful) =================== */
+const KEY = "dmaic-challenge-lab-v1";
+const store = {
+  read(){ try{ const r=localStorage.getItem(KEY); return r?JSON.parse(r):null; }catch(e){ return null; } },
+  write(o){ try{ localStorage.setItem(KEY, JSON.stringify(o)); }catch(e){ /* preview / private mode: in-memory only */ } }
+};
+
+/* =================== STATE =================== */
+const state = {
+  name: "",
+  active: 0,
+  mods: MODULES.map(m => ({ answers: Array(m.questions.length).fill(null), score: 0, done: false }))
+};
+
+function hydrate(){
+  const saved = store.read();
+  if(!saved) return;
+  if(typeof saved.name === "string") state.name = saved.name;
+  if(Number.isInteger(saved.active)) state.active = Math.min(Math.max(saved.active,0), MODULES.length-1);
+  if(Array.isArray(saved.mods) && saved.mods.length === MODULES.length){
+    saved.mods.forEach((sm,i)=>{
+      const m = MODULES[i];
+      if(sm && Array.isArray(sm.answers) && sm.answers.length === m.questions.length){
+        state.mods[i].answers = sm.answers.map(a => Number.isInteger(a)?a:null);
+        state.mods[i].score = state.mods[i].answers.reduce((acc,a,qi)=> acc + (a!==null && m.questions[qi].opts[a] && m.questions[qi].opts[a].c ? 1:0), 0);
+        state.mods[i].done = state.mods[i].answers.every(a=>a!==null);
+      }
+    });
+  }
+}
+function persist(){ store.write({ name: state.name, active: state.active, mods: state.mods }); }
+
+/* short descriptions for the home module map */
+const BLURBS = [
+  "Frame the right problem. Problem statements, VOC→CTQ, SIPOC, scope, and Pareto selection.",
+  "Trust your data first. Operational definitions, Gage R&R, capability (Cpk), DPMO, and sampling.",
+  "Let data convict the cause. Fishbone, 5 Whys, hypothesis tests, and p-value interpretation.",
+  "Prove the fix. DOE, poka-yoke, impact–effort prioritization, piloting, and FMEA.",
+  "Make it stick. Control chart selection, tampering vs signal, OCAP, and financial handoff."
+];
+
+/* =================== HELPERS =================== */
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const totalQuestions = () => MODULES.reduce((a,m)=>a+m.questions.length,0);
+const overallScore  = () => state.mods.reduce((a,s)=>a+s.score,0);
+const completedCount= () => state.mods.filter(s=>s.done).length;
+const allDone       = () => state.mods.every(s=>s.done);
+const anyProgress   = () => state.mods.some(s=>s.answers.some(a=>a!==null));
+const unlocked      = i => i===0 || state.mods[i-1].done;
+const modPct        = i => Math.round(state.mods[i].score / MODULES[i].questions.length * 100);
+
+/* =================== ROUTING =================== */
+const VIEWS = { home:"view-home", train:"view-train", cert:"view-cert" };
+let current = "home";
+
+function go(view, opts={}){
+  if(!VIEWS[view]) view="home";
+  if(view==="cert" && !allDone() && !opts.forceCert){ /* still allow, shows locked panel */ }
+  current = view;
+  $$(".view").forEach(v=>v.classList.remove("active"));
+  $("#"+VIEWS[view]).classList.add("active");
+  $$("#navlinks a").forEach(a=>a.classList.toggle("on", a.dataset.view===view));
+  if(location.hash.replace("#","") !== hashFor(view)) location.hash = hashFor(view);
+  if(view==="home") renderHome();
+  if(view==="train") renderTrain();
+  if(view==="cert") renderCert();
+  window.scrollTo({top:0, behavior: opts.noScroll?"auto":"smooth"});
+}
+const hashFor = v => v==="cert" ? "certificate" : v;
+const viewForHash = h => h==="certificate" ? "cert" : (VIEWS[h] ? h : "home");
+
+window.addEventListener("hashchange", ()=>{
+  const v = viewForHash(location.hash.replace("#",""));
+  if(v!==current) go(v,{noScroll:true});
+});
+
+/* =================== NAV / GLOBAL CHROME =================== */
+function renderChrome(){
+  const pct = Math.round(completedCount()/MODULES.length*100);
+  $("#navPct").textContent = pct+"%";
+  const cLink = $$('#navlinks a').find(a=>a.dataset.view==="cert");
+  cLink.classList.toggle("locked", !allDone());
+  cLink.title = allDone() ? "View your certificate" : "Complete all five phases to unlock";
+  $("#ovScore") && ($("#ovScore").textContent = overallScore());
+  $("#ovScoreHome") && ($("#ovScoreHome").textContent = overallScore());
+}
+
+/* =================== HOME =================== */
+function renderHome(){
+  $("#ovTotalHome").textContent = totalQuestions();
+  $("#ovScoreHome").textContent = overallScore();
+  const nameInput = $("#nameInput");
+  if(document.activeElement !== nameInput) nameInput.value = state.name;
+  const startBtn = $("#startBtn");
+  startBtn.textContent = anyProgress() ? `Resume — ${MODULES[state.active].name} →` : "Begin training →";
+
+  const map = $("#moduleMap");
+  map.innerHTML = "";
+  MODULES.forEach((m,i)=>{
+    const s = state.mods[i];
+    const open = unlocked(i);
+    const status = s.done ? `${modPct(i)}%` : (open ? "Open" : "Locked");
+    const btn = document.createElement("button");
+    btn.className="mapcard";
+    btn.style.setProperty("--ac", m.acHex);
+    btn.disabled = !open;
+    btn.innerHTML = `
+      <div class="top">
+        <div class="badge">${m.letter}</div>
+        <div class="ph">${m.name}</div>
+        <div class="st ${s.done?'done':''}">${s.done?'✓ '+status:status}</div>
+      </div>
+      <p>${BLURBS[i]}</p>
+      ${open?'':'<span class="lock">🔒 finish previous phase</span>'}`;
+    if(open) btn.addEventListener("click", ()=>{ state.active=i; persist(); go("train"); });
+    map.appendChild(btn);
+  });
+  renderChart();
+  renderChrome();
+}
+
+$("#nameInput").addEventListener("input", e=>{ state.name=e.target.value; persist(); });
+
+/* =================== TRAIN =================== */
+function renderTrain(){
+  $("#ovTotal").textContent = totalQuestions();
+  renderStepper();
+  renderModule();
+  renderChart();
+  renderChrome();
+}
+
+function renderStepper(){
+  const el = $("#stepper"); el.innerHTML="";
+  MODULES.forEach((m,i)=>{
+    const s = state.mods[i], open = unlocked(i);
+    const b = document.createElement("button");
+    b.className="step"; b.style.setProperty("--ac",m.ac);
+    b.dataset.on = i===state.active?"1":"0";
+    b.dataset.done = s.done?"1":"0";
+    b.disabled = !open;
+    const pct = s.done ? modPct(i)+"%" : (open?"open":"locked");
+    b.innerHTML=`<span class="tick">✓</span><div class="ltr">${m.letter}</div><div class="nm">${m.name}</div><div class="pct">${pct}</div><span class="bar"><i style="width:${s.done?100:(i===state.active?6:0)}%"></i></span>`;
+    b.addEventListener("click",()=>{ if(open){ state.active=i; persist(); renderTrain(); $("#module").focus(); }});
+    el.appendChild(b);
+  });
+}
+
+function renderModule(){
+  const m = MODULES[state.active], s = state.mods[state.active];
+  const el = $("#module");
+  el.style.setProperty("--ac", m.ac);
+  el.innerHTML = `
+    <div class="phase-head">
+      <div class="badge" style="background:${m.acHex}">${m.letter}</div>
+      <div class="meta"><div class="eye">Phase ${state.active+1} of 5</div><h2>${m.name}</h2></div>
+    </div>
+    <div class="card challenge">
+      <div class="tag">The Challenge</div>
+      <p>${m.challenge}</p>
+      <div class="who">${m.who}</div>
+    </div>
+    <div class="cols">
+      <div class="card mini"><h3>What you must master</h3><ul>${m.objectives.map(o=>`<li>${o}</li>`).join("")}</ul></div>
+      <div class="card mini tools"><h3>Critical tools</h3><ul>${m.tools.map(o=>`<li>${o}</li>`).join("")}</ul></div>
+    </div>
+    <div class="card example">
+      <div class="tag">Worked Example</div>
+      <h3 style="font-family:'Space Grotesk';font-size:18px;margin:2px 0 12px">${m.example.title}</h3>
+      <div class="ex-body">${m.example.body}</div>
+    </div>
+    <div class="quiz-head">
+      <h3>Prove It — ${m.name} Questionnaire</h3>
+      <span class="cnt"><span id="modScore">${s.score}</span> / ${m.questions.length} correct</span>
+    </div>
+    <div id="quiz"></div>
+    <div class="done-banner" id="doneBanner">
+      <div class="scorebig" id="bigScore"></div>
+      <div class="txt"><b id="bigMsg"></b><p id="bigSub"></p></div>
+      <button class="nextbtn" id="nextBtn"></button>
+    </div>`;
+  renderQuiz();
+}
+
+function renderQuiz(){
+  const m = MODULES[state.active], s = state.mods[state.active];
+  const quiz = $("#quiz"); quiz.innerHTML="";
+  m.questions.forEach((q,qi)=>{
+    const chosen = s.answers[qi];
+    const card = document.createElement("div"); card.className="q";
+    card.innerHTML = `<div class="qn">${q.qn}</div>${q.scn?`<div class="scn">${q.scn}</div>`:""}<div class="qt">${q.qt}</div><div class="opts"></div><div class="why" id="why-${qi}"></div>`;
+    const optsEl = card.querySelector(".opts");
+    q.opts.forEach((o,oi)=>{
+      const btn = document.createElement("button"); btn.className="opt";
+      btn.innerHTML = `<span class="key">${String.fromCharCode(65+oi)}</span>${o.t}`;
+      if(chosen!==null){ btn.disabled=true; if(o.c) btn.classList.add("correct"); if(oi===chosen && !o.c) btn.classList.add("wrong"); }
+      btn.addEventListener("click",()=>answer(qi,oi));
+      optsEl.appendChild(btn);
+    });
+    quiz.appendChild(card);
+    if(chosen!==null) showWhy(qi,chosen);
+  });
+  updateDoneBanner();
+}
+
+function showWhy(qi,oi){
+  const o = MODULES[state.active].questions[qi].opts[oi];
+  const el = $("#why-"+qi);
+  el.className = "why show " + (o.c?"r":"w");
+  el.innerHTML = `<b>${o.c?"Correct":"Not quite"}</b>${o.w}`;
+}
+
+function answer(qi,oi){
+  const s = state.mods[state.active], q = MODULES[state.active].questions[qi];
+  if(s.answers[qi]!==null) return;
+  s.answers[qi]=oi;
+  if(q.opts[oi].c) s.score++;
+  if(s.answers.every(a=>a!==null)) s.done=true;
+  persist();
+  renderQuiz();
+  $("#modScore").textContent = s.score;
+  renderStepper();
+  renderChart();
+  renderChrome();
+}
+
+function updateDoneBanner(){
+  const m = MODULES[state.active], s = state.mods[state.active];
+  const banner = $("#doneBanner");
+  if(!s.answers.every(a=>a!==null)){ banner.classList.remove("show"); return; }
+  banner.classList.add("show");
+  const pct = modPct(state.active);
+  $("#bigScore").textContent = pct+"%";
+  $("#bigMsg").textContent = pct===100?"Phase mastered — flawless.":pct>=80?"Phase passed — solid command.":pct>=60?"Phase complete — review the misses.":"Phase complete — worth a second pass.";
+  const last = state.active===MODULES.length-1;
+  $("#bigSub").textContent = last
+    ? (allDone()? `You scored ${overallScore()} / ${totalQuestions()} across the full DMAIC cycle. Line 7 is stable and handed off.` : "Finish the remaining phases to unlock your certificate.")
+    : `Point plotted on your mastery chart. Next up: ${MODULES[state.active+1].name}.`;
+  const btn = $("#nextBtn");
+  if(last && allDone()){ btn.textContent="View your certificate →"; btn.onclick=()=>go("cert"); }
+  else if(last){ btn.textContent="↑ Back to top"; btn.onclick=()=>window.scrollTo({top:0,behavior:'smooth'}); }
+  else { btn.textContent=`Continue to ${MODULES[state.active+1].name} →`; btn.onclick=()=>{ state.active++; persist(); renderTrain(); window.scrollTo({top:0,behavior:'smooth'}); }; }
+}
+
+/* =================== MASTERY CONTROL CHART =================== */
+function renderChart(){
+  const svgs = $$(".chartsvg");
+  if(!svgs.length) return;
+  const W=880,H=128,padL=34,padR=14,padT=14,padB=24;
+  const ix = i => padL + (W-padL-padR)*(i/(MODULES.length-1));
+  const iy = p => (H-padB) - (H-padT-padB)*(p/100);
+  let g="";
+  [0,50,100].forEach(v=>{ const y=iy(v);
+    g+=`<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="var(--grid)" stroke-width="1"/>`;
+    g+=`<text x="${padL-8}" y="${y+3}" text-anchor="end" font-family="Space Mono" font-size="9" fill="var(--ink-faint)">${v}</text>`;
+  });
+  const ty=iy(80);
+  g+=`<line x1="${padL}" y1="${ty}" x2="${W-padR}" y2="${ty}" stroke="var(--good)" stroke-width="1" stroke-dasharray="4 4" opacity=".6"/>`;
+  g+=`<text x="${W-padR}" y="${ty-5}" text-anchor="end" font-family="Space Mono" font-size="9" fill="var(--good)">TARGET 80%</text>`;
+  MODULES.forEach((m,i)=>{ g+=`<text x="${ix(i)}" y="${H-7}" text-anchor="middle" font-family="Space Grotesk" font-weight="700" font-size="12" fill="${state.mods[i].done?m.acHex:'var(--ink-faint)'}">${m.letter}</text>`; });
+  const pts=[];
+  MODULES.forEach((m,i)=>{ if(state.mods[i].done) pts.push([ix(i), iy(modPct(i)), m.acHex]); });
+  if(pts.length>1){ let d="M "+pts[0][0]+" "+pts[0][1]; for(let k=1;k<pts.length;k++) d+=" L "+pts[k][0]+" "+pts[k][1]; g+=`<path d="${d}" fill="none" stroke="var(--ink-soft)" stroke-width="1.5" opacity=".5"/>`; }
+  pts.forEach(p=>{ g+=`<circle cx="${p[0]}" cy="${p[1]}" r="5.5" fill="${p[2]}" stroke="var(--paper)" stroke-width="2"/>`; });
+  if(current==="train" && !state.mods[state.active].done){ g+=`<circle cx="${ix(state.active)}" cy="${iy(2)}" r="3" fill="none" stroke="${MODULES[state.active].acHex}" stroke-width="1.5" stroke-dasharray="2 2"/>`; }
+  svgs.forEach(s=>s.innerHTML=g);
+}
+
+/* =================== CERTIFICATE =================== */
+function renderCert(){
+  const el = $("#certContent");
+  if(!allDone()){
+    const remaining = MODULES.filter((m,i)=>!state.mods[i].done).map(m=>m.name);
+    el.innerHTML = `
+      <div class="cert-locked">
+        <div class="cert-eyebrow" style="color:var(--ink-faint)">Certificate of Completion</div>
+        <h2>Almost there</h2>
+        <p>Your certificate unlocks once you complete all five DMAIC phases. Finish the questionnaires to plot every point on your mastery chart.</p>
+        <div class="prog">${completedCount()} of 5 phases complete · ${overallScore()} / ${totalQuestions()} correct</div>
+        <div class="remain">${MODULES.map((m,i)=>`<span class="${state.mods[i].done?'done':'todo'}">${state.mods[i].done?'✓ ':''}${m.name}</span>`).join("")}</div>
+        <div style="margin-top:24px"><button class="btn primary" id="contTrainBtn">Continue training →</button></div>
+      </div>`;
+    const firstIncomplete = MODULES.findIndex((m,i)=>!state.mods[i].done);
+    $("#contTrainBtn").addEventListener("click", ()=>{ state.active = firstIncomplete>=0?firstIncomplete:state.active; persist(); go("train"); });
+    renderChrome();
+    return;
+  }
+  const total = overallScore(), max = totalQuestions();
+  const pct = Math.round(total/max*100);
+  const date = new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  const nm = (state.name && state.name.trim()) ? state.name.trim() : "";
+  el.innerHTML = `
+    <div class="certificate" id="certificate">
+      <div class="cert-inner">
+        <div class="cert-eyebrow">Lean Six Sigma · DMAIC Challenge Lab</div>
+        <div class="cert-title">Certificate of <span>Completion</span></div>
+        <div class="cert-pre">This certifies that</div>
+        <div class="cert-name" id="certName">${nm || "—"}</div>
+        <div class="cert-body">has completed the five-phase <b>DMAIC Challenge Lab</b>, working the Meridian Electronics Line 7 case through <b>Define, Measure, Analyze, Improve,</b> and <b>Control</b> — and passed the scenario questionnaires in each phase.</div>
+        <div class="cert-stats">
+          <div class="cert-stat"><div class="v">${pct}%</div><div class="k">Overall Score</div></div>
+          <div class="cert-stat"><div class="v">${total}/${max}</div><div class="k">Questions Correct</div></div>
+          <div class="cert-stat"><div class="v">5/5</div><div class="k">Phases Mastered</div></div>
+        </div>
+        <div class="cert-phases">${MODULES.map((m,i)=>`<span>${m.name} · ${modPct(i)}%</span>`).join("")}</div>
+        <div class="cert-foot">
+          <div class="cert-sign"><div class="who">${date}</div><div class="line">DATE COMPLETED</div></div>
+          <svg class="seal" viewBox="0 0 74 74" fill="none" aria-hidden="true">
+            <circle cx="37" cy="37" r="35" stroke="#2F6F57" stroke-width="1.5"/>
+            <circle cx="37" cy="37" r="28" stroke="#C2CABF" stroke-width="1"/>
+            <polyline points="24,38 32,46 50,26" fill="none" stroke="#2F6F57" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="37" y="16" text-anchor="middle" font-family="Space Mono" font-size="6.5" letter-spacing="1.5" fill="#46544D">MASTERY</text>
+            <text x="37" y="64" text-anchor="middle" font-family="Space Mono" font-size="6.5" letter-spacing="1.5" fill="#46544D">VERIFIED</text>
+          </svg>
+          <div class="cert-sign"><div class="who">DMAIC Challenge Lab</div><div class="line">ISSUING PROGRAM</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="cert-actions no-print">
+      <div class="namefield"><label for="certNameInput">Name on certificate</label><input id="certNameInput" type="text" placeholder="Enter your name" value="${nm.replace(/"/g,'&quot;')}"></div>
+      <button class="btn primary" id="printBtn" style="align-self:flex-end">⤓ Print / Save as PDF</button>
+    </div>`;
+  const cn = $("#certNameInput");
+  cn.addEventListener("input", e=>{ state.name=e.target.value; persist(); $("#certName").textContent = e.target.value.trim()||"—"; });
+  $("#printBtn").addEventListener("click", ()=>{ if(!state.name.trim()){ cn.focus(); cn.style.borderColor="var(--bad)"; return; } window.print(); });
+  renderChrome();
+}
+
+/* =================== RESET =================== */
+$("#reset").addEventListener("click", ()=>{
+  if(!confirm("Reset all progress and scores? This cannot be undone.")) return;
+  state.name = state.name; // keep name
+  state.active = 0;
+  state.mods = MODULES.map(m=>({answers:Array(m.questions.length).fill(null),score:0,done:false}));
+  persist();
+  go("home");
+});
+
+/* =================== BOOT =================== */
+hydrate();
+$("#ovTotalHome").textContent = totalQuestions();
+$("#ovTotal").textContent = totalQuestions();
+$$('#navlinks a').forEach(a=>{
+  a.addEventListener("click",(e)=>{
+    if(a.classList.contains("locked")){ e.preventDefault(); return; }
+    e.preventDefault(); go(a.dataset.view);
+  });
+});
+$("#startBtn").addEventListener("click",(e)=>{ e.preventDefault(); go("train"); });
+go(viewForHash(location.hash.replace("#","")), {noScroll:true});
+</script>
+</body>
+</html>
